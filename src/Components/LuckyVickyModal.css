@@ -1,0 +1,123 @@
+/* FE 2 */
+
+/* 전체 오버레이 */
+.lucky-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* 제일 위로 */
+}
+
+/* 가운데 카드 */
+.lucky-modal {
+  position: relative;
+  width: min(420px, 90vw);
+  padding: 32px 24px 28px;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+}
+
+/* 텍스트 영역 */
+.lucky-content {
+  position: relative;
+  text-align: center;
+  z-index: 2;
+}
+
+.lucky-subtitle {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.lucky-title {
+  font-size: 1.8rem;
+  margin: 0 0 8px;
+}
+
+.lucky-desc {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* 버튼 */
+.lucky-button {
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background: #4caf50;
+  color: #fff;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.lucky-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+}
+
+/* 양쪽 폭죽/이모지 영역 */
+.lucky-confetti {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1;
+}
+
+.lucky-confetti.left {
+  left: -10px;
+}
+
+.lucky-confetti.right {
+  right: -10px;
+}
+
+/* 각각 이모지에 애니메이션 */
+.lucky-confetti span {
+  font-size: 2rem;
+  animation: pop 1.2s ease-out infinite;
+}
+
+/* 각 이모지마다 살짝 타이밍/위치 다르게 */
+.lucky-confetti.left span:nth-child(1),
+.lucky-confetti.right span:nth-child(1) {
+  animation-delay: 0s;
+}
+.lucky-confetti.left span:nth-child(2),
+.lucky-confetti.right span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.lucky-confetti.left span:nth-child(3),
+.lucky-confetti.right span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pop {
+  0% {
+    transform: translateY(20px) scale(0.7);
+    opacity: 0;
+  }
+  30% {
+    transform: translateY(-10px) scale(1.05);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(-18px) scale(0.95);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-30px) scale(0.8);
+    opacity: 0;
+  }
+}
