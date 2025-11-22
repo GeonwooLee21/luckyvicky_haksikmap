@@ -1,7 +1,7 @@
 // FE2
 // src/Api.js
 
-const BASE_URL = "http://localhost:4000"; // ✅ 백엔드 서버 주소로 바꾸기
+const BASE_URL = "http://localhost:4000"; // 백엔드 서버 주소로 바꾸기
 
 // 공통 fetch 함수 (에러 처리까지 한 번에)
 async function request(path, options = {}) {
