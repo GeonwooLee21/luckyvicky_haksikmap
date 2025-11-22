@@ -5,17 +5,17 @@ import { Link } from "react-router-dom";
 function MainPage() {
   return (
     <Container>
-      <CardLink to="/Cafeteria/Gongstaurant.jsx">
+      <CardLink to="/Cafeteria/Gongstaurant">
         <Left>공식당</Left>
         <Right>🥵</Right>
       </CardLink>
 
-      <CardLink to="/Cafeteria/Cheomseong.jsx">
+      <CardLink to="/Cafeteria/Cheomseong">
         <Left>복지관</Left>
         <Right>😐</Right>
       </CardLink>
 
-      <CardLink to="/Cafeteria/Gamggoteria.jsx">
+      <CardLink to="/Cafeteria/Gamggoteria">
         <Left>감꽃식당</Left>
         <Right>🥳</Right>
       </CardLink>

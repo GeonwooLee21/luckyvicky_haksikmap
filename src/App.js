@@ -14,9 +14,9 @@ function App() {
 
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/cafeteria/gong" element={<Gongstaurant />} />
-          <Route path="/cafeteria/cheom" element={<Cheomseong />} />
-          <Route path="/cafeteria/gamggot" element={<Gamggoteria />} />
+          <Route path="/Cafeteria/Gongstaurant" element={<Gongstaurant />} />
+          <Route path="/Cafeteria/Cheomseong" element={<Cheomseong />} />
+          <Route path="/Cafeteria/Gamggoteria" element={<Gamggoteria />} />
         </Routes>
       </AppWrapper>
     </Router>
