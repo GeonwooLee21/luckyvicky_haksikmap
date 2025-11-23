@@ -1,9 +1,10 @@
 // FE1 & FE2
-// src/Components/CafeteriaMain.jsx
+// src/Components/CafeteriaPage.jsx
 import styled from "styled-components";
 import { Link, useParams } from "react-router-dom";
+import VoteButtons from "./VotePage";
 
-function CafeteriaMain() {
+function CafeteriaPage() {
   const { name } = useParams();
 
   // URL 파라미터(name)에 따라 제목/멘트 설정
@@ -39,13 +40,13 @@ function CafeteriaMain() {
 
       <BottomRow>
         <BackButton to="/">첫 화면으로 돌아가기</BackButton>
-        <VoteButton>투표하기</VoteButton>
+        <VoteButton as={Link} to={`/vote/${name}`}>투표하기</VoteButton>
       </BottomRow>
     </Wrapper>
   );
 }
 
-export default CafeteriaMain;
+export default CafeteriaPage;
 
 // ---- styled-components ----
 const Wrapper = styled.div`
@@ -112,6 +113,7 @@ const VoteButton = styled.button`
   width: 230px;
   padding: 14px 0;
   border: 2px solid #003048;
+  text-align: center;
   background-color: white;
   font-size: 16px;
   cursor: pointer;

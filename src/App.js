@@ -3,6 +3,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainPage from "./Components/MainPage";
 import CafeteriaMain from "./Components/CafeteriaPage";
+import VotePage from "./Components/VotePage";
 import styled from "styled-components";
 
 import GlobalStyle from "./Styles/GlobalStyles";
@@ -21,6 +22,9 @@ function App() {
 
           {/* 상세 화면: /Cafeteria/Gongstaurant, /Cafeteria/Cheomseong, /Cafeteria/Gamggot */}
           <Route path="/Cafeteria/:name" element={<CafeteriaMain />} />
+
+          {/* 투표 화면 */}
+          <Route path="/vote/:name" element={<VotePage />} />
         </Routes>
       </AppWrapper>
     </Router>

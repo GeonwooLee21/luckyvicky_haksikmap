@@ -12,7 +12,7 @@ const List = styled.div`
 
 const Card = styled.button`
   width: 100%;
-  padding: 16px 20px;
+  padding: 16px 100px;
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.cardBg};
@@ -30,6 +30,10 @@ const Card = styled.button`
   }
 `;
 
+const Name = styled.span`
+  margin-right: 12px;
+`;
+
 const Emoji = styled.span`
   font-size: 22px;
 `;
@@ -38,8 +42,8 @@ export default function MainPage() {
   const navigate = useNavigate();
 
   const cafeterias = [
-    { id: "official", name: "공식당", emoji: "🥵" },
-    { id: "welfare", name: "복지관", emoji: "😐" },
+    { id: "gongstaurant", name: "공식당", emoji: "🥵" },
+    { id: "cheomseong", name: "복지관", emoji: "😐" },
     { id: "gamggot", name: "감꽃식당", emoji: "🥳" },
   ];
 
@@ -50,7 +54,7 @@ export default function MainPage() {
           key={cafe.id}
           onClick={() => navigate(`/cafeteria/${cafe.id}`)}
         >
-          <span>{cafe.name}</span>
+          <Name>{cafe.name}</Name>
           <Emoji>{cafe.emoji}</Emoji>
         </Card>
       ))}
