@@ -16,9 +16,13 @@ const Card = styled.button`
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.cardBg};
+  
+  position: relative;
+  
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+
   font-size: 16px;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
@@ -31,10 +35,11 @@ const Card = styled.button`
 `;
 
 const Name = styled.span`
-  margin-right: 50px;
 `;
 
 const Emoji = styled.span`
+  position: absolute;
+  right: 40px;
   font-size: 22px;
 `;
 

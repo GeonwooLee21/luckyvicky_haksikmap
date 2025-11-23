@@ -46,10 +46,10 @@ const AppWrapper = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 48px;
+  font-family: 'Jua', sans-serif;
+  font-size: 56px;
   font-weight: 800;
-  margin-bottom: 40px;
+  margin-bottom: 0px;
   color: #ff66cc;
-  text-decoration: underline;
   text-underline-offset: 10px;
 `;

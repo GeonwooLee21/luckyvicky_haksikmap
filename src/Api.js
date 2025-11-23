@@ -89,3 +89,17 @@ export async function getPredictedWaitTime(restaurantId) {
     method: "GET",
   });
 }
+
+// src/Api.js
+export async function createUser() {
+  return { userId: "TEST_USER" }; // 임시
+}
+
+export async function getUserVoteRemain(userId) {
+  return { remaining: 2 }; // 임시
+}
+
+export async function sendVote(payload) {
+  console.log("임시 투표전송", payload);
+  return { ok: true };
+}

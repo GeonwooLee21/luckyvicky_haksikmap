@@ -8,7 +8,7 @@ export default function PredictedWaitText({ waitMinutes }) {
 
   return (
     <p style={{ fontSize: "1.2rem", marginTop: "12px" }}>
-      {waitMinutes}분 정도 기다리셔야 해요ㅠㅠ
+      {waitMinutes}분 정도 기다리셔야 해요😅
     </p>
   );
 }
