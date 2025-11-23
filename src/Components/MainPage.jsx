@@ -12,7 +12,7 @@ const List = styled.div`
 
 const Card = styled.button`
   width: 100%;
-  padding: 16px 100px;
+  padding: 16px 130px;
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.cardBg};
@@ -39,7 +39,7 @@ const Name = styled.span`
 
 const Emoji = styled.span`
   position: absolute;
-  right: 40px;
+  right: 20px;
   font-size: 22px;
 `;
 

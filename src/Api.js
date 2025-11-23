@@ -58,6 +58,19 @@ export async function postVote(cafeteriaId, level) {
   });
 }
 
+export async function createUser() {
+  return { userId: "TEST_USER" }; // 임시
+}
+
+export async function getUserVoteRemain(userId) {
+  return { remaining: 2 }; // 임시
+}
+
+export async function sendVote(payload) {
+  console.log("임시 투표전송", payload);
+  return { ok: true };
+}
+
 /* 4) 사진 업로드
 POST /cafeterias/:id/photo
 FormData로 파일 전송 (이건 JSON이 아니라 multipart/form-data) */
@@ -88,18 +101,4 @@ export async function getPredictedWaitTime(restaurantId) {
   return request(`/api/restaurant/${restaurantId}/wait-time`, {
     method: "GET",
   });
-}
-
-// src/Api.js
-export async function createUser() {
-  return { userId: "TEST_USER" }; // 임시
-}
-
-export async function getUserVoteRemain(userId) {
-  return { remaining: 2 }; // 임시
-}
-
-export async function sendVote(payload) {
-  console.log("임시 투표전송", payload);
-  return { ok: true };
 }
