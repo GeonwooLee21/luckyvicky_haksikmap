@@ -31,7 +31,7 @@ const Card = styled.button`
 `;
 
 const Name = styled.span`
-  margin-right: 12px;
+  margin-right: 50px;
 `;
 
 const Emoji = styled.span`

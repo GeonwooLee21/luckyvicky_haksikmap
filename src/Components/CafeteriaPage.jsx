@@ -1,13 +1,15 @@
-// FE1 & FE2
+// FE1 & FE2 공통 상세페이지 레이아웃
 // src/Components/CafeteriaPage.jsx
 import styled from "styled-components";
-import { Link, useParams } from "react-router-dom";
-import VoteButtons from "./VotePage";
+import { Link, useParams, useLocation } from "react-router-dom";
+import CrowdChart from "./CrowdChart";
 
 function CafeteriaPage() {
   const { name } = useParams();
+  const location = useLocation();
 
-  // URL 파라미터(name)에 따라 제목/멘트 설정
+  const voted = location.state?.fromVote === true;
+
   const info = {
     Gongstaurant: {
       title: "공식당",
@@ -23,102 +25,105 @@ function CafeteriaPage() {
     },
   };
 
-  const current = info[name] || info.Gongstaurant; // 혹시 이상한 name이면 공식당으로 fallback
+  const current = info[name] || info.Gongstaurant;
 
   return (
     <Wrapper>
-      <TopBox>{current.title}</TopBox>
-      <MessageBox>{current.message}</MessageBox>
+      <Card>{current.title}</Card>
+      <Card>{current.message}</Card>
 
-      <GraphBox>
-        투표해주시면
-        <br />
-        시간대별 혼잡도 그래프를
-        <br />
-        확인하실 수 있어요!
-      </GraphBox>
+      <ChartCard>
+        {voted ? ( <CrowdChart data={[]} />) : 
+        ( <>
+          투표해주시면
+          <br/>
+          시간대별 혼잡도 그래프를
+          <br/>
+          확인하실 수 있어요!
+          </>
+        )}
+      </ChartCard>
 
-      <BottomRow>
-        <BackButton to="/">첫 화면으로 돌아가기</BackButton>
-        <VoteButton as={Link} to={`/vote/${name}`}>투표하기</VoteButton>
-      </BottomRow>
+      <ButtonRow>
+        <StyledLink to="/">첫 화면으로 돌아가기</StyledLink>
+        <StyledButton as={Link} to={`/vote/${name}`}>투표하기</StyledButton>
+      </ButtonRow>
+
     </Wrapper>
   );
 }
 
 export default CafeteriaPage;
 
-// ---- styled-components ----
+/* ---------------- styled-components ---------------- */
+
 const Wrapper = styled.div`
   width: 100%;
-  max-width: 900px;
-  margin-top: 20px;
+  max-width: 360px;
+  margin: 0 auto;
+  margin-top: 24px;
+
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 25px;
+  gap: 20px;
+  text-align: center;
 `;
 
-const TopBox = styled.div`
-  width: 60%;
-  padding: 20px 0;
-  border: 3px solid #003048;
-  text-align: center;
-  font-size: 28px;
+const Card = styled.div`
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme }) => theme.colors.cardBg};
+  font-size: 18px;
   font-weight: 600;
 `;
 
-const MessageBox = styled.div`
-  width: 70%;
-  padding: 18px 0;
-  border: 3px solid #003048;
-  text-align: center;
-  font-size: 24px;
-`;
+const ChartCard = styled(Card)`
+  height: 200px;
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.muted};
 
-const GraphBox = styled.div`
-  width: 80%;
-  height: 380px;
-  border: 4px solid #003048;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  line-height: 1.5;
-  text-align: center;
+  line-height: 1.6;
 `;
 
-const BottomRow = styled.div`
-  width: 80%;
+const ButtonRow = styled.div`
   display: flex;
-  justify-content: space-between;
-  margin-top: 40px;
+  gap: 12px;
+  margin-top: 12px;
 `;
 
-const BackButton = styled(Link)`
-  width: 230px;
-  padding: 14px 0;
-  border: 2px solid #003048;
-  text-align: center;
-  font-size: 16px;
-  text-decoration: none;
-  color: #000;
-
-  &:hover {
-    background-color: #f0f8ff;
-  }
-`;
-
-const VoteButton = styled.button`
-  width: 230px;
-  padding: 14px 0;
-  border: 2px solid #003048;
-  text-align: center;
+const StyledLink = styled(Link)`
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 10px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
   background-color: white;
-  font-size: 16px;
+  text-decoration: none;
+  color: ${({ theme }) => theme.colors.text};
+  font-size: 14px;
+  text-align: center;
   cursor: pointer;
 
   &:hover {
-    background-color: #f0f8ff;
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
+  }
+`;
+
+const StyledButton = styled.button`
+  flex: 1;
+  padding: 12px 0;
+  border-radius: 10px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background-color: white;
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.primary};
+    box-shadow: 0 6px 14px rgba(0,0,0,0.05);
   }
 `;
