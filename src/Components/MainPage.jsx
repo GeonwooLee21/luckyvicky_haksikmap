@@ -1,5 +1,5 @@
 // FE1
-// src/MainPage.js
+// src/Components/MainPage.jsx
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 
@@ -42,9 +42,9 @@ export default function MainPage() {
   const navigate = useNavigate();
 
   const cafeterias = [
-    { id: "gongstaurant", name: "공식당", emoji: "🥵" },
-    { id: "cheomseong", name: "복지관", emoji: "😐" },
-    { id: "gamggot", name: "감꽃식당", emoji: "🥳" },
+    { id: "Gongstaurant", name: "공식당", emoji: "🥵" },
+    { id: "Cheomseong", name: "복지관", emoji: "😐" },
+    { id: "Gamggoteria", name: "감꽃식당", emoji: "🥳" },
   ];
 
   return (
@@ -52,7 +52,7 @@ export default function MainPage() {
       {cafeterias.map((cafe) => (
         <Card
           key={cafe.id}
-          onClick={() => navigate(`/cafeteria/${cafe.id}`)}
+          onClick={() => navigate(`/Cafeteria/${cafe.id}`)}
         >
           <Name>{cafe.name}</Name>
           <Emoji>{cafe.emoji}</Emoji>

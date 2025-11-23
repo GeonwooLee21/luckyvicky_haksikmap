@@ -26,6 +26,7 @@ function App() {
           {/* 투표 화면 */}
           <Route path="/vote/:name" element={<VotePage />} />
         </Routes>
+        
       </AppWrapper>
     </Router>
   );
