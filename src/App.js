@@ -1,9 +1,13 @@
+// FE1
 // src/App.js
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import MainPage from "./Components/MainPage";
+import CafeteriaMain from "./Components/CafeteriaPage";
 import styled from "styled-components";
 
-import MainPage from "./MainPage";
-import CafeteriaMain from "./Components/CafeteriaMain";
+import GlobalStyle from "./Styles/GlobalStyles";
+import { theme } from "./Styles/Theme";
+//import AppLayout from "./Components/Layout/AppLayout";
 
 function App() {
   return (
@@ -15,7 +19,7 @@ function App() {
           {/* 첫 화면: 학식당 리스트 */}
           <Route path="/" element={<MainPage />} />
 
-          {/* 상세 화면: /cafeteria/gong, /cafeteria/bokji, /cafeteria/gamggot */}
+          {/* 상세 화면: /Cafeteria/Gongstaurant, /Cafeteria/Cheomseong, /Cafeteria/Gamggot */}
           <Route path="/Cafeteria/:name" element={<CafeteriaMain />} />
         </Routes>
       </AppWrapper>

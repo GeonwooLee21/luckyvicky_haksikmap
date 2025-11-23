@@ -1,11 +1,15 @@
 // FE1
 export const theme = {
   colors: {
-    background: "#f7f7f7",
-    primary: "#0055ff",
-    text: "#333",
-    crowded: "#ff4d4d",
-    normal: "#ffa500",
-    free: "#4caf50",
+    primary: "#ff4faf",   // 럭키비키 핑크
+    primaryDark: "#e33d98",
+    bg: "#f7f7fb",
+    cardBg: "#ffffff",
+    border: "#dddddd",
+    text: "#222222",
+    muted: "#777777",
+  },
+  layout: {
+    maxWidth: "480px",
   },
 };

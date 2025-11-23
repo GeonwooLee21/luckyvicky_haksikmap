@@ -1,3 +1,4 @@
+// FE1 & FE2
 // src/Components/CafeteriaMain.jsx
 import styled from "styled-components";
 import { Link, useParams } from "react-router-dom";
