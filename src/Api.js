@@ -78,3 +78,14 @@ export async function uploadPhoto(cafeteriaId, file) {
   const text = await res.text();
   return text ? JSON.parse(text) : null;
 }
+
+/* 예측 대기시간 조회
+   GET /api/restaurant/{restaurant-id}/wait-time (가정)
+   응답 예시: { waitMinutes: 20 }
+*/
+export async function getPredictedWaitTime(restaurantId) {
+  // 실제 URL은 백엔드가 정해주는 대로 여기만 수정하면 됨
+  return request(`/api/restaurant/${restaurantId}/wait-time`, {
+    method: "GET",
+  });
+}
