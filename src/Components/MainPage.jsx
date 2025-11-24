@@ -2,6 +2,7 @@
 // src/Components/MainPage.jsx
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
+import { isOpenNow } from "./OpeningHours";
 
 const List = styled.div`
   display: flex;
@@ -34,6 +35,22 @@ const Card = styled.button`
   }
 `;
 
+const Overlay = styled.div`
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: #ffffff; /* 완전 불투명으로 변경 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+
+  pointer-events: none;
+`;
+
 const Name = styled.span`
 `;
 
@@ -45,6 +62,7 @@ const Emoji = styled.span`
 
 export default function MainPage() {
   const navigate = useNavigate();
+  const now = new Date();
 
   const cafeterias = [
     { id: "Gongstaurant", name: "공식당", emoji: "🥵" },
@@ -54,15 +72,23 @@ export default function MainPage() {
 
   return (
     <List>
-      {cafeterias.map((cafe) => (
-        <Card
-          key={cafe.id}
-          onClick={() => navigate(`/Cafeteria/${cafe.id}`)}
-        >
-          <Name>{cafe.name}</Name>
-          <Emoji>{cafe.emoji}</Emoji>
-        </Card>
-      ))}
+      {cafeterias.map((cafe) => {
+        const open = isOpenNow(cafe.id, now); // 지금 오픈 여부
+
+        return (
+          <Card
+            key={cafe.id}
+            onClick={() => navigate(`/Cafeteria/${cafe.id}`)}
+            $isOpen={open}
+          >
+            <Name>{cafe.name}</Name>
+            <Emoji>{cafe.emoji}</Emoji>
+
+            {/* 영업시간이 아닐 때만 오버레이 표시 */}
+            {!open && <Overlay>{`${cafe.name}은 지금 오픈 준비 중이에요💤`}</Overlay>}
+          </Card>
+        );
+      })}
     </List>
   );
 }
