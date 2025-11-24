@@ -24,7 +24,9 @@ const Card = styled.button`
   align-items: center;
   justify-content: center;
 
-  font-size: 16px;
+  font-size: 15px;
+  font-weight: 600;
+
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 
@@ -39,12 +41,12 @@ const Overlay = styled.div`
   position: absolute;
   inset: 0;
   border-radius: 12px;
-  background: #ffffff; /* 완전 불투명으로 변경 */
+  background: #ffffff; /* 완전 불투명 */
   display: flex;
   align-items: center;
   justify-content: center;
 
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #333;
 

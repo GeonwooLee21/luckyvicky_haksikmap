@@ -88,7 +88,7 @@ export default CafeteriaPage;
 
 const Wrapper = styled.div`
   width: 100%;
-  max-width: 360px;
+  max-width: 350px;
   margin: 0 auto;
   margin-top: 24px;
 
@@ -103,7 +103,7 @@ const Card = styled.div`
   border-radius: 12px;
   border: 1px solid ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.cardBg};
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 600;
 `;
 
