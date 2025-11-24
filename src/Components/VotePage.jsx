@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useParams, useNavigate } from "react-router-dom";
-import { createUser, getUserVoteRemain, sendVote } from "../Api";
+import { getRemainingVotes, postVote } from "../Api";
 
 // 혼잡도 → 한글 라벨
 const LEVEL_LABELS = {
@@ -13,18 +13,21 @@ const LEVEL_LABELS = {
   relaxed: "여유",
 };
 
-// 혼잡도 → 대기시간 옵션 2개
-const WAIT_OPTIONS = {
-  relaxed: ["바로 입장", "5분"],
-  normal: ["10분", "15분"],
-  busy: ["20분", "20분 이상"],
-};
+// 대기시간 옵션 (혼잡도와 상관없이 공통)
+const WAIT_OPTIONS = [
+  "바로 입장",
+  "5분",
+  "10분",
+  "15분",
+  "20분",
+  "20분 이상",
+];
+
 
 function VotePage() {
   const { name } = useParams(); // Gongstaurant / Cheomseong / Gamggoteria
   const navigate = useNavigate();
 
-  const [userId, setUserId] = useState(null);
   const [remaining, setRemaining] = useState(null); // 남은 투표횟수
   const [loadingRemain, setLoadingRemain] = useState(true);
 
@@ -34,29 +37,22 @@ function VotePage() {
 
   // ----- 1) 처음 진입 시 userId + 잔여 투표횟수 가져오기 -----
   useEffect(() => {
-    async function initUser() {
-      try {
-        let storedId = localStorage.getItem("lv_user_id");
-
-        if (!storedId) {
-          const res = await createUser(); // { userId: "..." } 가정
-          storedId = res.userId;
-          localStorage.setItem("lv_user_id", storedId);
-        }
-
-        setUserId(storedId);
-
-        const remainRes = await getUserVoteRemain(storedId); // { remaining: 2 } 가정
-        setRemaining(remainRes.remaining);
-      } catch (err) {
-        console.error("잔여 투표횟수 조회 실패:", err);
-      } finally {
-        setLoadingRemain(false);
-      }
+  async function loadRemain() {
+    try {
+      // 백엔드 응답: { userId, remainingVoteCount } 가정
+      const data = await getRemainingVotes();
+      setRemaining(data.remainingVoteCount);
+    } catch (err) {
+      console.error("잔여 투표횟수 조회 실패:", err);
+    } finally {
+      setLoadingRemain(false);
     }
+  }
 
-    initUser();
-  }, []);
+  loadRemain();
+}, []);
+
+
 
   // 오늘 이미 2번 다 사용했는지 여부
   const noChanceLeft = remaining === 0;
@@ -75,37 +71,41 @@ function VotePage() {
 
   // ----- 3) 투표하기 클릭 -----
   const handleSubmit = async () => {
-    if (!selectedLevel || !selectedWait) return;
-    if (!userId) {
-      alert("유저 정보를 불러오는 중입니다. 잠시 후 다시 시도해 주세요.");
-      return;
+  if (!selectedLevel || !selectedWait) return;
+
+  if (noChanceLeft) {
+    alert("오늘 투표 가능 횟수를 모두 사용하셨어요!");
+    return;
+  }
+
+  try {
+    const cafeteriaId = name;
+
+    // "10분", "15분", "바로 입장" 같은 텍스트 → 숫자(분)로 변환
+    let waitingMinutes = 0;
+    if (selectedWait === "바로 입장") {
+      waitingMinutes = 0;
+    } else {
+      // "10분" → 10
+      waitingMinutes = parseInt(selectedWait, 10);
     }
 
-    if (noChanceLeft) {
-      alert("오늘 투표 가능 횟수를 모두 사용하셨어요!");
-      return;
-    }
+    // Api.js 의 postVote(식당키, 혼잡도, 대기시간분)
+    await postVote(cafeteriaId, selectedLevel, waitingMinutes);
 
-    try {
-      const restaurantId = name;
+    // 투표 후 최신 잔여횟수 다시 조회
+    const data = await getRemainingVotes();
+    setRemaining(data.remainingVoteCount);
 
-      await sendVote({
-        userId,
-        restaurantId,
-        level: selectedLevel,
-        waitTime: selectedWait,
-      });
+    setShowModal(true);
+  } catch (err) {
+    console.error("투표 전송 실패:", err);
+    alert("투표에 실패했어요. 잠시 후 다시 시도해 주세요.");
+  }
+};
 
-      setRemaining((prev) =>
-        typeof prev === "number" ? Math.max(prev - 1, 0) : prev
-      );
 
-      setShowModal(true);
-    } catch (err) {
-      console.error("투표 전송 실패:", err);
-      alert("투표에 실패했어요. 잠시 후 다시 시도해 주세요.");
-    }
-  };
+
 
   // ----- 4) 모달에서 확인 눌렀을 때 -----
   const handleModalClose = () => {
@@ -146,11 +146,11 @@ function VotePage() {
         ))}
       </LevelRow>
 
-      {/* 대기시간 선택: 혼잡도 선택 후에만 표시 */}
+      {/* 대기시간 선택: 혼잡도 선택 후에만 표시 */}  
       {selectedLevel && (
         <>
           <SectionTitle>대기시간은 어느 정도인가요?</SectionTitle>
-          {WAIT_OPTIONS[selectedLevel].map((opt) => (
+          {WAIT_OPTIONS.map((opt) => (
             <OptionButton
               key={opt}
               type="button"
@@ -163,6 +163,7 @@ function VotePage() {
           ))}
         </>
       )}
+
 
       {/* 투표하기 버튼: 둘 다 선택된 경우에만 표시 */}
       {selectedLevel && selectedWait && (
