@@ -16,7 +16,7 @@ export const CAFETERIA_HOURS = {
 
   // 감꽃식당 운영 시간
   Gamggoteria: [
-    { days: [1, 2, 3, 4, 5], open: "11:30", close: "13:30" },
+    { days: [1, 2, 3, 4, 5], open: "11:30", close: "21:30" },
   ],
 };
 

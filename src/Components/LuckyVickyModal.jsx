@@ -1,5 +1,6 @@
 //FE 2
-// src/Components/LuckyBikiModal.jsx
+//src/Components/LuckyVickyModal.jsx
+
 import React from "react";
 import "./LuckyVickyModal.css";
 
