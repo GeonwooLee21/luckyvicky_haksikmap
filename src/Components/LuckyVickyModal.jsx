@@ -1,6 +1,7 @@
-//FE 2
-//src/Components/LuckyVickyModal.jsx
-
+// ==================================
+// FE 2
+// src/Components/LuckyVickyModal.jsx
+// ==================================
 import React from "react";
 import "./LuckyVickyModal.css";
 
@@ -30,7 +31,7 @@ export default function LuckyVickyModal({ open, onClose }) {
           <p className="lucky-subtitle">오늘의 럭키 타임</p>
           <h2 className="lucky-title">럭키비키시네요 🎉</h2>
           <p className="lucky-desc">
-            지금은 여유로운 시간이에요.
+            지금은 여유로운 시간이에요!
             <br />
             편하게 식사하러 가볼까요?
           </p>

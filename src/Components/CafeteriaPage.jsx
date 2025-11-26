@@ -1,30 +1,50 @@
+// =================================
 // FE1 & FE2 공통 상세페이지 레이아웃
 // src/Components/CafeteriaPage.jsx
+// =================================
 import styled from "styled-components";
 import { Link, useParams, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";         // ✅ 추가
+import { useEffect, useState } from "react";
 import CrowdChart from "./CrowdChart";
 import { isOpenNow } from "./OpeningHours";
 import LastWeekText from "./lastWeekText";
-import LuckyVickyModal from "./LuckyVickyModal";    // ✅ 추가
-import { getRestaurantStatus } from "../Api";       // ✅ 추가
+import LuckyVickyModal from "./LuckyVickyModal";
+import { getRestaurantStatus } from "../Api";
 
-// ✅ FE 라우트 name → 백엔드 restaurantId 매핑
+// FE 라우트 name → 백엔드 restaurantId 매핑
 const RESTAURANT_IDS = {
   Gongstaurant: 1,
   Cheomseong: 2,
   Gamggoteria: 3,
 };
 
-// ✅ 혼잡도 숫자 → 한글 라벨
+// 혼잡도 숫자 → 혼잡도 라벨
 // (백엔드에서 주는 값 범위에 맞게 기준은 팀에서 조정 가능)
 function congestionValueToLabel(value) {
   if (value == null) return null;
 
-  if (value < 0) return null;      // 집계 전 같은 경우
+  // -1 등 집계 전 값이 오면 null 처리
+  if (value < 0) return null;
+
   if (value >= 70) return "혼잡";
   if (value >= 40) return "보통";
-  return "여유";                   // 0~39
+  return "여유"; // 0~39
+}
+
+// 혼잡도 라벨 → 자연스러운 문장
+function labelToSentence(label) {
+  if (!label) return null;
+
+  switch (label) {
+    case "혼잡":
+      return "혼잡해요";
+    case "보통":
+      return "보통이에요";
+    case "여유":
+      return "여유로워요";
+    default:
+      return `${label}이에요`; // fallback
+  }
 }
 
 function CafeteriaPage() {
@@ -50,61 +70,81 @@ function CafeteriaPage() {
 
   const current = info[name] || info.Gongstaurant;
 
-  // ✅ 현재 시간 기준 오픈 여부
+  // 현재 시간 기준 오픈 여부
   const open = isOpenNow(name);
 
-  // ✅ 백엔드 혼잡도 상태
-  const [isLoading, setIsLoading] = useState(false);
+  // 백엔드 혼잡도 상태
+  const [isLoading, setIsLoading] = useState(true);
   const [congestionLabel, setCongestionLabel] = useState(null);
 
-  // ✅ 럭키비키 모달 on/off
+  // 럭키비키 모달 on/off
   const [showLuckyModal, setShowLuckyModal] = useState(false);
 
   const restaurantId = RESTAURANT_IDS[name] ?? RESTAURANT_IDS.Gongstaurant;
 
-  // ✅ 마운트될 때 / name 바뀔 때마다 혼잡도 불러오기
+  // 상세 페이지 진입 / 식당 변경 시: 상태 초기화
   useEffect(() => {
+    setShowLuckyModal(false);
+    setCongestionLabel(null);
+    setIsLoading(true);
+  }, [restaurantId]);
+
+  // 마운트될 때 / name(restaurantId) 바뀔 때마다 혼잡도 불러오기
+  useEffect(() => {
+    let cancelled = false; // 언마운트 후 setState 방지용
+
     async function fetchStatus() {
-      setIsLoading(true);
       try {
         const res = await getRestaurantStatus(restaurantId);
 
-        // ⚠️ 여기서 필드명은 백엔드 응답에 맞게 수정!
-        // 예: res.congestion, res.crowding, res.score 등
-        const rawValue = res.congestion; // <- 이 부분만 실제에 맞게 바꾸면 됨
-
+        // 백엔드 응답 필드명에 맞게 수정 (currentCongestion)
+        // const rawValue = Number(res.currentCongestion); // 30 이런 값
+        
+        const rawValue = res?.congestionValue;
         const label = congestionValueToLabel(rawValue);
+        if (cancelled) return;
+
         setCongestionLabel(label);
+
+        // 응답까지 받은 뒤, 여유 상태 + 오픈 중이면 모달 오픈
+        // (원하면 voted도 조건에 추가 가능: open && label === "여유" && voted)
+        if (open && label === "여유") {
+          setShowLuckyModal(true);
+        }
       } catch (err) {
         console.error("식당 혼잡도 불러오기 실패:", err);
-        setCongestionLabel(null);
+        if (!cancelled) {
+          setCongestionLabel(null);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchStatus();
-  }, [restaurantId]);
 
-  // ✅ 혼잡도가 '여유'일 때만 럭키비키 모달 자동 오픈
-  useEffect(() => {
-    // 오픈중이면서, 로딩이 끝났고, 혼잡도 라벨이 '여유'일 때
-    if (open && !isLoading && congestionLabel === "여유") {
-      setShowLuckyModal(true);
-    }
-  }, [open, isLoading, congestionLabel]);
+    return () => {
+      cancelled = true;
+    };
+  }, [restaurantId, open]);
 
   return (
     <Wrapper>
       {/* 식당 이름 */}
       <Card>{current.title}</Card>
 
-      {/* 안내 멘트: 오픈 여부에 따라 변경 */}
-      <Card>
-        {open
-          ? current.message
-          : `${current.title}은 지금 오픈 준비 중이에요.`}
-      </Card>
+      {/* 안내 멘트: 오픈 여부 + 혼잡도 로딩 상태에 따라 변경 */}
+      <MainTextCard>
+        {!open
+          ? `${current.title}은 지금 오픈 준비 중이에요.`
+          : isLoading
+          ? `${current.title}은 혼잡도 집계 중이에요`
+          : congestionLabel
+          ? `${current.title}은 ${labelToSentence(congestionLabel)}`
+          : `${current.title}은 혼잡도 집계 중이에요`}
+      </MainTextCard>
 
       {/* 오픈 중일 때만 그래프 카드 보이기 */}
       {open ? (
@@ -114,7 +154,7 @@ function CafeteriaPage() {
               {/* 2번 기능: 그래프 */}
               <CrowdChart data={[]} />
 
-              {/* ⭐ 3번 기능: 일주일 전 이 시간대에는 OOO했어요 */}
+              {/* 3번 기능: "일주일 전 이 시간대에는 OOO했어요" */}
               <LastWeekText cafeteria={name} />
             </>
           ) : (
@@ -148,10 +188,10 @@ function CafeteriaPage() {
         )}
       </ButtonRow>
 
-      {/* ✅ 여유일 때만 띄우는 럭키비키 모달 */}
+      {/* 여유일 때만 띄우는 럭키비키 모달 */}
       <LuckyVickyModal
-        open={showLuckyModal}                  // 모달 열림 여부
-        onClose={() => setShowLuckyModal(false)} // 닫기 콜백
+        open={showLuckyModal}
+        onClose={() => setShowLuckyModal(false)}
       />
     </Wrapper>
   );
@@ -180,6 +220,11 @@ const Card = styled.div`
   background-color: ${({ theme }) => theme.colors.cardBg};
   font-size: 15px;
   font-weight: 600;
+`;
+
+// 메인 텍스트 카드 (멘트용)
+const MainTextCard = styled(Card)`
+  font-weight: 500;
 `;
 
 const ChartCard = styled(Card)`

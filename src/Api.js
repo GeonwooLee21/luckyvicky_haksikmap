@@ -8,7 +8,7 @@
 // ================================
 // 예: "http://localhost:8080"
 //    "http://147.46.xxx.xxx:8080"
-export const BASE_URL = "http://15.164.171.142:8080";
+export const BASE_URL = "http://54.180.79.173:8080";
 
 
 // ================================
@@ -108,17 +108,26 @@ export async function getAllRestaurantStatus() {
   return request("/api/restaurant", { method: "GET" });
 }
 
-// ================================
+// ===============================================================
 // 5) 식당 한 곳 혼잡도 조회
-// GET /api/restaurant/{id}
-// (예시 응답: { "RestaurantId": 1, "CongestionOfId1": 100 })
-// ================================
+// GET /api/restaurant/{restaurant-id}
+// 응답 예: { "id": 3, "name": "감꽃식당", "currentCongestion": 30 }
+// ===============================================================
 export async function getRestaurantStatus(restaurantId) {
-  return request(`/api/restaurant/${restaurantId}`, {
+  const data = await request(`/api/restaurant/${restaurantId}`, {
     method: "GET",
   });
-}
 
+  if (!data) return null;
+
+  return {
+    ...data,
+    // ✅ 프론트에서 쓸 통일된 필드명 + 숫자 캐스팅
+    congestionValue: Number(
+      data.congestionValue ?? data.currentCongestion ?? 0
+    ),
+  };
+}
 
 // ================================
 // 6) 지난주 동일 요일/시간대 히스토리 조회
