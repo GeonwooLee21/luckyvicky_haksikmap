@@ -10,6 +10,10 @@ import { isOpenNow } from "./OpeningHours";
 import LastWeekText from "./lastWeekText";
 import LuckyVickyModal from "./LuckyVickyModal";
 import { getRestaurantStatus } from "../Api";
+import { GONGSTAURANT_DUMMY } from "../Dummy/Gongstaurant_Dummy";
+import { GAMGGOTERIA_DUMMY } from "../Dummy/Gamggoteria_Dummy";
+import { CHEOMSEONG_DUMMY } from "../Dummy/Cheomseong_Dummy";
+
 
 // FE 라우트 name → 백엔드 restaurantId 매핑
 const RESTAURANT_IDS = {
@@ -25,7 +29,6 @@ function congestionValueToLabel(value) {
 
   // -1 등 집계 전 값이 오면 null 처리
   if (value < 0) return null;
-
   if (value >= 70) return "혼잡";
   if (value >= 40) return "보통";
   return "여유"; // 0~39
@@ -65,7 +68,7 @@ function CafeteriaPage() {
   const { name } = useParams();
   const location = useLocation();
 
-  const voted = location.state?.fromVote === true;
+  //const voted = location.state?.fromVote === true;
 
   const info = {
     Gongstaurant: {
@@ -84,8 +87,19 @@ function CafeteriaPage() {
 
   const current = info[name] || info.Gongstaurant;
 
+  // 식당별 더미 그래프 데이터 매핑
+  const chartDataMap = {
+    Gongstaurant: GONGSTAURANT_DUMMY,
+    Gamggoteria: GAMGGOTERIA_DUMMY,
+    Cheomseong: CHEOMSEONG_DUMMY,
+  };
+  const chartData = chartDataMap[name] || GONGSTAURANT_DUMMY;
+
   // 현재 시간 기준 오픈 여부
   const open = isOpenNow(name);
+
+  // 🔹 오늘 아무 식당에서나 투표한 적 있는지
+  const [hasTodayVote, setHasTodayVote] = useState(false);
 
   // 백엔드 혼잡도 상태
   const [isLoading, setIsLoading] = useState(true);
@@ -95,6 +109,25 @@ function CafeteriaPage() {
   const [showLuckyModal, setShowLuckyModal] = useState(false);
 
   const restaurantId = RESTAURANT_IDS[name] ?? RESTAURANT_IDS.Gongstaurant;
+
+  // 🔹 오늘 이미 아무 식당에서나 투표했는지 확인
+  useEffect(() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, "0");
+    const d = String(today.getDate()).padStart(2, "0");
+    const todayStr = `${y}-${m}-${d}`;
+
+    const stored = localStorage.getItem("voted_date");
+
+    // 혹시 이번에 투표하고 넘어온 경우(location.state로 온 경우)
+    if (location.state?.fromVote === true) {
+      localStorage.setItem("voted_date", todayStr);
+      setHasTodayVote(true);
+    } else {
+      setHasTodayVote(stored === todayStr);
+    }
+  }, [location.state]);
 
   // 상세 페이지 진입 / 식당 변경 시: 상태 초기화
   useEffect(() => {
@@ -159,10 +192,10 @@ function CafeteriaPage() {
       {/* 오픈 중일 때만 그래프 카드 보이기 */}
       {open ? (
         <ChartCard>
-          {voted ? (
+          {hasTodayVote ? (
             <>
               {/* 2번 기능: 그래프 */}
-              <CrowdChart data={[]} />
+              <CrowdChart data={chartData} />
 
               {/* 3번 기능: "일주일 전 이 시간대에는 OOO했어요" */}
               <LastWeekText cafeteria={name} />

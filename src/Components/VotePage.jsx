@@ -107,7 +107,15 @@ function VotePage() {
         setRemaining(data.remainingVoteCount);
       }
 
-      setShowModal(true);
+      // 🔹 오늘 아무 식당이든 한 번 투표했음을 기록 (YYYY-MM-DD 형식)
+      const today = new Date();
+      const y = today.getFullYear();
+      const m = String(today.getMonth() + 1).padStart(2, "0");
+      const d = String(today.getDate()).padStart(2, "0");
+      const todayStr = `${y}-${m}-${d}`;
+      localStorage.setItem("voted_date", todayStr);
+
+      setShowModal(true); // 투표 완료 모달 열기
     } catch (err) {
       console.error("투표 전송 실패:", err);
       alert("투표에 실패했어요. 잠시 후 다시 시도해 주세요.");
