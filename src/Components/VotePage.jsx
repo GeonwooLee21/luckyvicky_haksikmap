@@ -39,11 +39,18 @@ function VotePage() {
   useEffect(() => {
     async function loadRemain() {
       try {
-        // 백엔드 응답: { "remainingVoteCount": 2 }
+        // 백엔드 응답: { "remainingVoteCount": 2 } (Api.js 기준)
         const data = await getRemainingVotes();
-        setRemaining(data.remainingVoteCount);
+
+        if (data && typeof data.remainingVoteCount === "number") {
+          setRemaining(data.remainingVoteCount);
+        } else {
+          // 응답 형식이 예상과 다를 때
+          setRemaining(null);
+        }
       } catch (err) {
         console.error("잔여 투표횟수 조회 실패:", err);
+        setRemaining(null);
       } finally {
         setLoadingRemain(false);
       }
@@ -52,8 +59,9 @@ function VotePage() {
     loadRemain();
   }, []);
 
-  // 오늘 이미 제공된 투표 횟수(2번) 다 사용했는지 여부
-  const noChanceLeft = remaining === 0;
+  // 오늘 제공된 투표 횟수를 다 사용했는지 여부
+  // remaining이 null이면 아직 정보 없음 → false 처리
+  const noChanceLeft = remaining !== null && remaining <= 0;
 
   // ---------- 2) 혼잡도 / 대기시간 선택 ----------
   const handleLevelClick = (level) => {
@@ -77,8 +85,9 @@ function VotePage() {
     }
 
     try {
-      // Gongstaurant / Cheomseong / Gamggoteria
-      const cafeteriaId = name; 
+      // 라우트 파라미터 그대로 Api.js로 넘김
+      // (Api.postVote에서 Gongstaurant/Cheomseong/Gamggoteria → restaurantId 매핑)
+      const cafeteriaKey = name;
 
       // "10분", "15분", "바로 입장" 같은 텍스트 → 숫자(분)로 변환
       let waitingMinutes = 0;
@@ -90,11 +99,13 @@ function VotePage() {
       }
 
       // Api.js 의 postVote(식당키, 혼잡도, 대기시간분)
-      await postVote(cafeteriaId, selectedLevel, waitingMinutes);
+      await postVote(cafeteriaKey, selectedLevel, waitingMinutes);
 
       // 투표 후 최신 잔여횟수 다시 조회
       const data = await getRemainingVotes();
-      setRemaining(data.remainingVoteCount);
+      if (data && typeof data.remainingVoteCount === "number") {
+        setRemaining(data.remainingVoteCount);
+      }
 
       setShowModal(true);
     } catch (err) {

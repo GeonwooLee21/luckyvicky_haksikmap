@@ -8,7 +8,7 @@
 // ================================
 // 예: "http://localhost:8080"
 //    "http://147.46.xxx.xxx:8080"
-export const BASE_URL = "http://54.180.79.173:8080";
+export const BASE_URL = "http://3.39.9.14:8080";
 
 
 // ================================
@@ -59,18 +59,14 @@ function getOrCreateClientUid() {
 async function createUserOnServer() {
   const clientUid = getOrCreateClientUid();
 
-  // POST /api/user  (명세서 기준)
+  // 🔧 body 제거: 서버가 아직 clientUid를 안 받는 구조일 수 있음
   const res = await request("/api/user", {
     method: "POST",
-    body: JSON.stringify({ clientUid }),  // 백엔드와 필드명 맞추기
+    // body: JSON.stringify({ clientUid }),
   });
 
   // 응답 예시:
-  // {
-  //   "userId": 1,
-  //   "userToken": "550e8400-e29b-41d4-a716-446655440000",
-  //   "remainingVoteCount": 2
-  // }
+  // { "userId": 1, "userToken": "...", "remainingVoteCount": 2 }
 
   localStorage.setItem("userId", String(res.userId));
   localStorage.setItem("userToken", res.userToken);
@@ -80,7 +76,6 @@ async function createUserOnServer() {
 }
 
 // 3-3. FE에서 “유저를 반드시 확보”하는 함수
-//      → userId, userToken이 없으면 서버에서 생성
 export async function ensureUser() {
   const existingToken = localStorage.getItem("userToken");
   const existingId = localStorage.getItem("userId");
@@ -142,7 +137,7 @@ export async function getCafeteriaHistory(restaurantId) {
 
 // ================================
 // 7) 혼잡도 + 대기시간 투표
-// POST /api/vote
+// POST /api/vote  (JSON Body)
 // ================================
 export async function postVote(cafeteriaKey, level, waitingMinutes) {
   const user = await ensureUser();
@@ -166,10 +161,14 @@ export async function postVote(cafeteriaKey, level, waitingMinutes) {
   return request("/api/vote", {
     method: "POST",
     headers: {
-      "X-User-Token": token,
+      // ✅ 백엔드 예시 코드에는 없지만, 우리 명세상 필수
+      "Content-Type": "application/json",
+      // ✅ Content-Type 은 request() 기본값이 application/json 이라 안 써도 되지만,
+      //   명시해 두고 싶으면 이렇게 써도 됨
+      // "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      userId,                    // 필요하다면 추가
+      userId,
       restaurantId,
       congestionLevel: LEVEL_MAP[level],
       waitingTime: waitingMinutes,
@@ -177,20 +176,33 @@ export async function postVote(cafeteriaKey, level, waitingMinutes) {
   });
 }
 
+
+
+
 // ================================
 // 8) 잔여 투표 횟수 조회
-// GET /api/user/remaining-votes
+// GET /api/user/vote
 // ================================
 export async function getRemainingVotes() {
   const user = await ensureUser();
 
-  return request("/api/user/vote", {
+  const res = await request("/api/user/vote", {
     method: "GET",
     headers: {
-      "X-User-Token": user.userToken,
+      // 명세서에 맞게 헤더 이름 수정
+      "user-token": user.userToken,
     },
   });
+
+  // 응답 예시: { "remainingVoteCount": 1 } 라고 가정
+  if (res && typeof res.remainingVoteCount === "number") {
+    localStorage.setItem("remainingVoteCount", String(res.remainingVoteCount));
+  }
+
+  // 그대로 넘겨서 VotePage에서 res.remainingVoteCount 사용 가능하게
+  return res;
 }
+
 
 
 // ================================

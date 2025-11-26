@@ -19,3 +19,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* 링크 드래그 미리보기 제거 */
+a {
+  -webkit-user-drag: none;
+}
