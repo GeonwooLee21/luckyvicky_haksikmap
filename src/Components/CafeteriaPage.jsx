@@ -12,9 +12,8 @@ import { getRestaurantStatus } from "../Api";
 import { GONGSTAURANT_DUMMY } from "../Dummy/Gongstaurant_Dummy";
 import { GAMGGOTERIA_DUMMY } from "../Dummy/Gamggoteria_Dummy";
 import { CHEOMSEONG_DUMMY } from "../Dummy/Cheomseong_Dummy";
-
 import { getRemainingVotes } from "../Api";
-
+import WaitTimeText from "./WaitTimeText";   // ✅ 예측 대기시간 멘트 컴포넌트 추가
 
 // FE 라우트 name → 백엔드 restaurantId 매핑
 const RESTAURANT_IDS = {
@@ -102,7 +101,7 @@ function CafeteriaPage() {
   // 현재 시간 기준 오픈 여부
   const open = isOpenNow(name);
 
-  // 🔹 오늘 아무 식당에서나 투표한 적 있는지
+  // 오늘 아무 식당에서나 투표한 적 있는지
   const [hasTodayVote, setHasTodayVote] = useState(false);
 
   // 백엔드 혼잡도 상태
@@ -114,7 +113,7 @@ function CafeteriaPage() {
 
   const restaurantId = RESTAURANT_IDS[name] ?? RESTAURANT_IDS.Gongstaurant;
 
-  // 🔹 오늘 이미 아무 식당에서나 투표했는지 확인
+  // 오늘 이미 아무 식당에서나 투표했는지 확인
   useEffect(() => {
     const today = new Date();
     const y = today.getFullYear();
@@ -154,7 +153,7 @@ function CafeteriaPage() {
 
         setCongestionLabel(label);
 
-        // ✅ 오픈 중이고, 혼잡/보통/여유 라벨이 있으면 항상 럭키비키 모달
+        // 오픈 중이고, 혼잡/보통/여유 라벨이 있으면 항상 럭키비키 모달
         if (open && label) {
           setShowLuckyModal(true);
         }
@@ -177,28 +176,27 @@ function CafeteriaPage() {
     };
   }, [restaurantId, open]);
 
-  // ✅ 투표하기 버튼 눌렀을 때: 잔여 투표 수 확인 후 이동/모달
+  // 투표하기 버튼 눌렀을 때: 잔여 투표 수 확인 후 이동/모달
   const handleClickVote = async () => {
     try {
       const res = await getRemainingVotes(name);
 
-      // 🔥 콘솔에 응답 모양, remaining 값을 찍어보는 부분
+      // 콘솔에 응답 모양, remaining 값을 찍어보는 부분
       console.log("잔여 투표 응답:", res);
 
       const remaining = res.remainingVoteCount;
       console.log("파싱한 remaining 값:", remaining);
 
       if (remaining <= 0) {
-        setIsNoVoteModalOpen(true); // 👉 여기로 들어오면 오늘 투표 다 쓴 상태
+        setIsNoVoteModalOpen(true); // 여기로 들어오면 오늘 투표 다 쓴 상태
       } else {
-        navigate(`/vote/${name}`); // 👉 여기로 들어오면 오늘 투표 다 쓴 상태
+        navigate(`/vote/${name}`); // 여기로 들어오면 오늘 투표 다 쓴 상태
       }
     } catch (err) {
       console.error("잔여 투표 수 확인 실패:", err);
       navigate(`/vote/${name}`);
     }
   };
-
 
   return (
     <Wrapper>
@@ -221,8 +219,9 @@ function CafeteriaPage() {
         <ChartCard>
           {hasTodayVote ? (
             <>
-              {/* 2번 기능: 그래프 */}
-              <CrowdChart data={chartData} />
+              {/* ✅ 투표를 한 날에만 예측 대기시간 멘트 + 그래프 보여주기 */}
+              <WaitTimeText restaurantId={restaurantId} />  {/* ✅ 멘트가 위 */}
+              <CrowdChart data={chartData} />                {/* ✅ 그래프는 아래 */}
             </>
           ) : (
             <>
@@ -255,14 +254,14 @@ function CafeteriaPage() {
         )}
       </ButtonRow>
 
-      {/* ✅ 모든 혼잡도 상태에서 띄우는 럭키비키 모달 */}
+      {/* 모든 혼잡도 상태에서 띄우는 럭키비키 모달 */}
       <LuckyVickyModal
         open={showLuckyModal}
         onClose={() => setShowLuckyModal(false)}
         level={labelToLevel(congestionLabel)}
       />
 
-      {/* ✅ 오늘 투표 횟수 모두 사용했을 때 뜨는 모달 */}
+      {/* 오늘 투표 횟수 모두 사용했을 때 뜨는 모달 */}
       <LuckyVickyModal
         open={isNoVoteModalOpen}
         onClose={() => setIsNoVoteModalOpen(false)}

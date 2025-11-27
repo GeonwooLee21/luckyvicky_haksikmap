@@ -4,15 +4,15 @@
 // ================================
 
 // ================================
-// 1) 백엔드 기본 주소 설정
-// ================================
+// 0) 백엔드 기본 주소 설정
 // 예: "http://localhost:8080"
 //    "http://147.46.xxx.xxx:8080"
+// ================================
 export const BASE_URL = "http://3.39.9.14:8080";
 
 
 // ================================
-// 2) 공통 request() 함수
+// 1) 공통 request() 함수
 // ================================
 async function request(path, options = {}) {
   const url = `${BASE_URL}${path}`;
@@ -42,45 +42,81 @@ async function request(path, options = {}) {
 
 
 // ================================
+// 2) 날짜 변경 시 localStorage 리셋
+// ================================
+function resetLocalStorageIfNewDay() {
+  // 오늘 날짜를 "YYYY-MM-DD" 형태의 문자열로 생성 (로컬 시간 기준)
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = String(today.getMonth() + 1).padStart(2, "0");
+  const d = String(today.getDate()).padStart(2, "0");
+  const todayStr = `${y}-${m}-${d}`;
+
+  const savedDate = localStorage.getItem("lastVisitDate");
+
+  if (savedDate !== todayStr) {
+    // 🔥 우리가 사용하는 키들만 삭제
+    localStorage.removeItem("clientUid");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("remainingVoteCount");
+
+    // 혹시 테스트용으로 쓰던 키도 있으면 같이 제거 (선택)
+    // localStorage.removeItem("lv_user_id");
+
+    // 오늘 날짜 저장
+    localStorage.setItem("lastVisitDate", todayStr);
+  }
+}
+
+
+// ================================
 // 3) 사용자 UID / 토큰 / 유저 생성
 // ================================
 
-// 3-1. 랜덤 UID 생성 + 저장 (프론트 클라이언트 고유 식별자)
+// 3-1. 랜덤 UID 생성 및 local storage에 저장 (프론트 클라이언트 고유 식별자)
 function getOrCreateClientUid() {
   let uid = localStorage.getItem("clientUid");
   if (!uid) {
-    uid = crypto.randomUUID();   // 또는 uuidv4()
+    uid = crypto.randomUUID(); // 또는 uuidv4()
     localStorage.setItem("clientUid", uid);
   }
   return uid;
 }
 
-// 3-2. 서버에서 userId, userToken 생성
+// 3-2. 서버에 userId, userToken 생성 요청
 async function createUserOnServer() {
   const clientUid = getOrCreateClientUid();
 
-  // 🔧 body 제거: 서버가 아직 clientUid를 안 받는 구조일 수 있음
+  // 서버에 새로운 유저를 만들어 달라는 POST 요청
   const res = await request("/api/user", {
     method: "POST",
     // body: JSON.stringify({ clientUid }),
   });
 
+  // 서버에서 받은 userId, userToken, remainingVotecount를 local storage에 저장
   // 응답 예시:
   // { "userId": 1, "userToken": "...", "remainingVoteCount": 2 }
-
   localStorage.setItem("userId", String(res.userId));
   localStorage.setItem("userToken", res.userToken);
   localStorage.setItem("remainingVoteCount", String(res.remainingVoteCount));
 
+  // 새 유저 정보 반환
   return res;
 }
 
 // 3-3. FE에서 “유저를 반드시 확보”하는 함수
 export async function ensureUser() {
+  // 자정이 지나면 local storage 초기화
+  resetLocalStorageIfNewDay();
+
+  // 이미 저장된 유저 정보가 있는지 확인
   const existingToken = localStorage.getItem("userToken");
   const existingId = localStorage.getItem("userId");
 
+  // 저장된 userToken과 userId가 있을 때
   if (existingToken && existingId) {
+    // 저장된 유저 정보 반환
     return {
       userId: Number(existingId),
       userToken: existingToken,
@@ -103,6 +139,7 @@ export async function getAllRestaurantStatus() {
   return request("/api/restaurant", { method: "GET" });
 }
 
+
 // ===============================================================
 // 5) 식당 한 곳 혼잡도 조회
 // GET /api/restaurant/{restaurant-id}
@@ -117,12 +154,13 @@ export async function getRestaurantStatus(restaurantId) {
 
   return {
     ...data,
-    // ✅ 프론트에서 쓸 통일된 필드명 + 숫자 캐스팅
+    // 프론트에서 쓸 통일된 필드명 + 숫자 캐스팅
     congestionValue: Number(
       data.congestionValue ?? data.currentCongestion ?? 0
     ),
   };
 }
+
 
 // ================================
 // 6) 지난주 동일 요일/시간대 히스토리 조회
@@ -161,11 +199,10 @@ export async function postVote(cafeteriaKey, level, waitingMinutes) {
   return request("/api/vote", {
     method: "POST",
     headers: {
-      // ✅ 백엔드 예시 코드에는 없지만, 우리 명세상 필수
+      "user-token": token,
+      // Content-Type 은 request() 기본값이 application/json 이라 안 써도 되지만,
+      // 명시해 두고 싶으면 이렇게 써도 됨
       "Content-Type": "application/json",
-      // ✅ Content-Type 은 request() 기본값이 application/json 이라 안 써도 되지만,
-      //   명시해 두고 싶으면 이렇게 써도 됨
-      // "Content-Type": "application/json",
     },
     body: JSON.stringify({
       userId,
@@ -175,8 +212,6 @@ export async function postVote(cafeteriaKey, level, waitingMinutes) {
     }),
   });
 }
-
-
 
 
 // ================================
@@ -204,11 +239,10 @@ export async function getRemainingVotes() {
 }
 
 
-
-// ================================
+// =================================
 // 9) 지난주 동일 시간대 텍스트용 (임시 더미)
 // FE2 lastWeekText.jsx에서 사용
-// ================================
+// =================================
 export async function getLastWeekStatus(cafeteria) {
   // TODO: 백엔드 연결되면 교체
   const dummy = {
@@ -223,36 +257,24 @@ export async function getLastWeekStatus(cafeteria) {
 }
 
 
-// ================================
-// 10) 사진 업로드
-// POST /api/restaurant/{id}/photo
-// ================================
-export async function uploadPhoto(restaurantId, file) {
-  const url = `${BASE_URL}/api/restaurant/${restaurantId}/photo`;
+// ==================================
+// 10) 대기시간 조회
+// GET /api/restaurant/{restaurant-id}/wait-time
+// 응답 예:
+// {
+//   "restaurantId": 1,
+//   "time": "2025-11-28 12:30",
+//   "waitTimeMin": 12,              // 없으면 -1 (집계중) 또는 null
+//   "status": "SUCCESS"
+// }
+// ==================================
+export async function getWaitTime(restaurantId) {
+  const user = await ensureUser();
 
-  const formData = new FormData();
-  formData.append("photo", file);
-
-  const res = await fetch(url, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!res.ok) {
-    throw new Error(`Photo upload error: ${res.status}`);
-  }
-
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
-}
-
-
-// ================================
-// 11) 예측 대기시간 조회
-// GET /api/restaurant/{id}/wait-time
-// ================================
-export async function getPredictedWaitTime(restaurantId) {
   return request(`/api/restaurant/${restaurantId}/wait-time`, {
     method: "GET",
+    headers: {
+      "user-token": user.userToken,
+    },
   });
 }
