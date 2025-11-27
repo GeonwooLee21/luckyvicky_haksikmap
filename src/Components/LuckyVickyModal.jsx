@@ -5,7 +5,7 @@
 import React from "react";
 import "./LuckyVickyModal.css";
 
-export default function LuckyVickyModal({ open, onClose, level }) {
+export default function LuckyVickyModal({ open, onClose, level, message }) {
   if (!open) return null;
 
   // 혼잡도 level에 따른 멘트 분기
@@ -58,19 +58,28 @@ export default function LuckyVickyModal({ open, onClose, level }) {
           <span>🎉</span>
           <span>✨</span>
           <span>🎊</span>
+          <span>🍀</span>
         </div>
         <div className="lucky-confetti right">
           <span>🎉</span>
           <span>✨</span>
           <span>🎊</span>
+          <span>🍀</span>
         </div>
 
         {/* 가운데 텍스트 */}
         <div className="lucky-content">
-          <p className="lucky-subtitle">오늘의 럭키 타임</p>
-          <h2 className="lucky-title">럭키비키시네요 🎉</h2>
+          {!message && (
+            <>
+            <p className="lucky-subtitle">오늘의 럭키 타임</p>
+            <h2 className="lucky-title">럭키비키시네요 🎉</h2>
+            </>
+          )
+          }
 
-          <p className="lucky-desc">{getDescByLevel(level)}</p>
+          <p className="lucky-desc">
+            {message ? message : getDescByLevel(level)}
+          </p>
 
           <button className="lucky-button" onClick={onClose}>
             좋아요!

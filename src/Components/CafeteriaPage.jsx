@@ -3,7 +3,7 @@
 // src/Components/CafeteriaPage.jsx
 // =================================
 import styled from "styled-components";
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CrowdChart from "./CrowdChart";
 import { isOpenNow } from "./OpeningHours";
@@ -13,6 +13,8 @@ import { getRestaurantStatus } from "../Api";
 import { GONGSTAURANT_DUMMY } from "../Dummy/Gongstaurant_Dummy";
 import { GAMGGOTERIA_DUMMY } from "../Dummy/Gamggoteria_Dummy";
 import { CHEOMSEONG_DUMMY } from "../Dummy/Cheomseong_Dummy";
+
+import { getRemainingVotes } from "../Api";
 
 
 // FE 라우트 name → 백엔드 restaurantId 매핑
@@ -67,8 +69,11 @@ function labelToSentence(label) {
 function CafeteriaPage() {
   const { name } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  //const voted = location.state?.fromVote === true;
+  const [isNoVoteModalOpen, setIsNoVoteModalOpen] = useState(false);
+
+  const voted = location.state?.fromVote === true;
 
   const info = {
     Gongstaurant: {
@@ -173,6 +178,29 @@ function CafeteriaPage() {
     };
   }, [restaurantId, open]);
 
+  // ✅ 투표하기 버튼 눌렀을 때: 잔여 투표 수 확인 후 이동/모달
+  const handleClickVote = async () => {
+    try {
+      const res = await getRemainingVotes(name);
+
+      // 🔥 콘솔에 응답 모양, remaining 값을 찍어보는 부분
+      console.log("잔여 투표 응답:", res);
+
+      const remaining = res.remainingVoteCount;
+      console.log("파싱한 remaining 값:", remaining);
+
+      if (remaining <= 0) {
+        setIsNoVoteModalOpen(true); // 👉 여기로 들어오면 오늘 투표 다 쓴 상태
+      } else {
+        navigate(`/vote/${name}`); // 👉 여기로 들어오면 오늘 투표 다 쓴 상태
+      }
+    } catch (err) {
+      console.error("잔여 투표 수 확인 실패:", err);
+      navigate(`/vote/${name}`);
+    }
+  };
+
+
   return (
     <Wrapper>
       {/* 식당 이름 */}
@@ -225,7 +253,7 @@ function CafeteriaPage() {
 
         {/* 오픈 시간에만 보이는 버튼 */}
         {open && (
-          <StyledButton as={Link} to={`/vote/${name}`}>
+          <StyledButton type="button" onClick={handleClickVote}>
             투표하기
           </StyledButton>
         )}
@@ -236,6 +264,13 @@ function CafeteriaPage() {
         open={showLuckyModal}
         onClose={() => setShowLuckyModal(false)}
         level={labelToLevel(congestionLabel)}
+      />
+
+      {/* ✅ 오늘 투표 횟수 모두 사용했을 때 뜨는 모달 */}
+      <LuckyVickyModal
+        open={isNoVoteModalOpen}
+        onClose={() => setIsNoVoteModalOpen(false)}
+        message="오늘의 투표 횟수를 모두 소진했어요😅"
       />
     </Wrapper>
   );
