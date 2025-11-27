@@ -303,7 +303,7 @@ const MainTextCard = styled(Card)`
 `;
 
 const ChartCard = styled(Card)`
-  height: 200px;
+  height: 280px;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.muted};
 
