@@ -49,11 +49,11 @@ function labelToSentence(label) {
   if (!label) return null;
   switch (label) {
     case "혼잡":
-      return "혼잡해요";
+      return "혼잡해요 🥵";
     case "보통":
-      return "보통이에요";
+      return "보통이에요 🙂";
     case "여유":
-      return "여유로워요";
+      return "여유로워요 🥳";
     default:
       return `${label}이에요`;
   }

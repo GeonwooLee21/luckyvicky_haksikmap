@@ -16,7 +16,7 @@ export const CAFETERIA_HOURS = {
 
   // 복지관 운영 시간
   Cheomseong: [
-    { days: [1, 2, 3, 4, 5], open: "11:15", close: "13:30", label: "중식" },
+    { days: [1, 2, 3, 4, 5], open: "11:15", close: "21:30", label: "중식" },
   ],
 
   // 감꽃식당 운영 시간
