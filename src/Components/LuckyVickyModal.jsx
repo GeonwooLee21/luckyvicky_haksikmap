@@ -71,8 +71,8 @@ export default function LuckyVickyModal({ open, onClose, level, message }) {
         <div className="lucky-content">
           {!message && (
             <>
-            <p className="lucky-subtitle">오늘의 럭키 타임</p>
-            <h2 className="lucky-title">럭키비키시네요 🎉</h2>
+              <p className="lucky-subtitle">오늘의 럭키 타임</p>
+              <h2 className="lucky-title">✨ 완전 럭키비키잖아 ✨</h2>
             </>
           )
           }
