@@ -35,6 +35,9 @@ function VotePage() {
   const [selectedWait, setSelectedWait] = useState(null);   // "5분" 같은 문자열
   const [showModal, setShowModal] = useState(false);
 
+  // 🔹 오늘 한 번이라도 투표한 적이 있는지 여부
+  const [hasVotedToday, setHasVotedToday] = useState(false);
+
   // ----- 1) 처음 진입 시 잔여 투표횟수 가져오기 -----
   useEffect(() => {
     async function loadRemain() {
@@ -57,6 +60,20 @@ function VotePage() {
     }
 
     loadRemain();
+  }, []);
+
+  // 🔹 페이지 진입 시, localStorage 를 보고 "오늘 이미 투표했는지" 확인
+  useEffect(() => {
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, "0");
+    const d = String(today.getDate()).padStart(2, "0");
+    const todayStr = `${y}-${m}-${d}`;
+    const votedDate = localStorage.getItem("voted_date");
+
+    if (votedDate === todayStr) {
+      setHasVotedToday(true);
+    }
   }, []);
 
   // 오늘 제공된 투표 횟수를 다 사용했는지 여부
@@ -114,6 +131,9 @@ function VotePage() {
       const d = String(today.getDate()).padStart(2, "0");
       const todayStr = `${y}-${m}-${d}`;
       localStorage.setItem("voted_date", todayStr);
+
+      // 🔹 현재 페이지에서도 즉시 "오늘 투표함" 상태로 전환
+      setHasVotedToday(true);
 
       setShowModal(true); // 투표 완료 모달 열기
     } catch (err) {
@@ -190,6 +210,13 @@ function VotePage() {
             ? "오늘 투표 횟수를 모두 소진하셨어요 😅"
             : "투표하기"}
         </SubmitButton>
+      )}
+
+      {/* 🔹 오늘 한 번이라도 투표한 적이 있으면 '뒤로 가기' 버튼 노출 */}
+      {hasVotedToday && (
+        <BackButton type="button" onClick={() => navigate(`/cafeteria/${name}`)}>
+          뒤로 가기
+        </BackButton>
       )}
 
       {/* 투표 완료 모달 */}
@@ -325,6 +352,22 @@ const SubmitButton = styled.button`
       `
       filter: brightness(0.96);
     `}
+  }
+`;
+
+// 🔹 새로 추가된 '뒤로 가기' 버튼 스타일
+const BackButton = styled.button`
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background-color: ${({ theme }) => theme.colors.cardBg};
+  color: ${({ theme }) => theme.colors.muted};
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 4px;
+
+  &:hover {
+    filter: brightness(0.97);
   }
 `;
 
