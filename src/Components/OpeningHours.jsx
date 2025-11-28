@@ -42,9 +42,7 @@ function formatDiffMinutes(diffMinutes) {
   return `${m}분`;
 }
 
-// ================================
 // 2) 현재 로컬 시간을 기준으로 [name] 식당이 영업 중인지 판별
-// ================================
 export function isOpenNow(name, now = new Date()) {
   const slots = CAFETERIA_HOURS[name];
   if (!slots) return true; // 설정이 없으면 일단 항상 오픈으로 취급
@@ -60,12 +58,10 @@ export function isOpenNow(name, now = new Date()) {
   });
 }
 
-// ================================
 // 3) 다음 운영 정보 계산
 //    - 지금 영업 중이면 null
 //    - 오늘 안에 남은 타임이 있으면 type: "today"
 //    - 오늘 다 끝났고 다음 날 이후라면 type: "tomorrow" 또는 "later"
-// ================================
 export function getNextOpeningInfo(name, now = new Date()) {
   const slots = CAFETERIA_HOURS[name];
   if (!slots) return null;
@@ -73,7 +69,7 @@ export function getNextOpeningInfo(name, now = new Date()) {
   const day = now.getDay(); // 0~6
   const minutesNow = now.getHours() * 60 + now.getMinutes();
 
-  // --- 3-1. 오늘 아직 시작 안 한 타임 중에서 가장 빠른 것 찾기 ---
+  // 3-1. 오늘 아직 시작 안 한 타임 중에서 가장 빠른 것 찾기
   const todaysUpcoming = slots
     .filter((slot) => slot.days.includes(day))
     .map((slot) => ({
@@ -100,7 +96,7 @@ export function getNextOpeningInfo(name, now = new Date()) {
     };
   }
 
-  // --- 3-2. 오늘은 더 이상 운영 없음 → 앞으로 7일 이내의 첫 타임 찾기 ---
+  // 3-2. 오늘은 더 이상 운영 없음 → 앞으로 7일 이내의 첫 타임 찾기
   // (무한 루프 방지 + 일주일 내에 없으면 운영 안하는 걸로 간주하고 null)
   let best = null;
 

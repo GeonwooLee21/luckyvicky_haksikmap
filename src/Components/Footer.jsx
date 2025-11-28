@@ -15,6 +15,6 @@ const Wrapper = styled.footer`
 
 export default function Footer() {
   return (
-    <Wrapper>© 2025 럭키비키학식맵 Team</Wrapper>
+    <Wrapper>© 2025 럭키비키학식 Team</Wrapper>
   );
 }

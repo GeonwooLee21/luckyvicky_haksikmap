@@ -5,7 +5,7 @@
 
 export const theme = {
   colors: {
-    primary: "#ff4faf",   // 럭키비키 핑크
+    primary: "#ff4faf",   // 럭키비키핑크
     primaryDark: "#e33d98",
     bg: "#f7f7fb",
     cardBg: "#ffffff",

@@ -55,7 +55,7 @@ function resetLocalStorageIfNewDay() {
   const savedDate = localStorage.getItem("lastVisitDate");
 
   if (savedDate !== todayStr) {
-    // 🔥 우리가 사용하는 키들만 삭제
+    // 유저가 사용하는 키들만 삭제(local storage 비우기)
     localStorage.removeItem("clientUid");
     localStorage.removeItem("userId");
     localStorage.removeItem("userToken");
@@ -277,17 +277,17 @@ export async function getRemainingVotes() {
 }
 
 
-// ==================================
+// ================================================
 // 9) 대기시간 조회
 // GET /api/restaurant/{restaurant-id}/wait-time
 // 응답 예:
 // {
 //   "restaurantId": 1,
 //   "time": "2025-11-28 12:30",
-//   "waitTimeMin": 12,              // 없으면 -1 (집계중) 또는 null
+//   "waitTimeMin": 12, // 없으면 -1 (집계중) 또는 null
 //   "status": "SUCCESS"
 // }
-// ==================================
+// ================================================
 export async function getWaitTime(restaurantId) {
   const user = await ensureUser();
 

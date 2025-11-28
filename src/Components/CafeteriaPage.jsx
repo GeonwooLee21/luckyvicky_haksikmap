@@ -185,7 +185,7 @@ function CafeteriaPage() {
       {/* 상태 + (비운영 시) 운영시간 안내까지 한 카드에 병합 */}
       <MainTextCard>
         {open ? (
-          // 🔓 운영 중
+          // 운영 중
           isLoading ? (
             `${current.title}은 혼잡도 집계 중이에요`
           ) : congestionLabel ? (
@@ -194,7 +194,7 @@ function CafeteriaPage() {
             `${current.title}은 혼잡도 집계 중이에요`
           )
         ) : nextOpeningInfo ? (
-          // 🔒 비운영 + 다음 운영 정보 있음
+          // 비운영 + 다음 운영 정보 있음
           <>
             {nextOpeningInfo.type === "today"
               ? `${current.title}은 지금 오픈 준비 중이에요.`
@@ -214,7 +214,7 @@ function CafeteriaPage() {
             </SubText>
           </>
         ) : (
-          // 🔒 비운영 + 시간 정보 없음 (fallback)
+          // 비운영 + 시간 정보 없음 (fallback)
           `${current.title}은 지금 오픈 준비 중이에요.`
         )}
       </MainTextCard>
@@ -294,7 +294,7 @@ const Card = styled.div`
   background-color: ${({ theme }) => theme.colors.cardBg};
   font-size: 15px;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.text};   /* 🔹 텍스트 색 명시 */
+  color: ${({ theme }) => theme.colors.text};   /* 텍스트 색 명시 */
 `;
 
 // 메인 텍스트 카드 (멘트용)
@@ -346,7 +346,7 @@ const StyledLink = styled(Link)`
   border: 1px solid ${({ theme }) => theme.colors.border};
   background-color: white;
   text-decoration: none;
-  color: ${({ theme }) => theme.colors.text};   /* ✅ 링크 글씨색 고정 */
+  color: ${({ theme }) => theme.colors.text};   /* 링크 글씨색 고정 */
   font-size: 14px;
   text-align: center;
   cursor: pointer;
@@ -366,7 +366,6 @@ const StyledButton = styled.button`
   font-size: 14px;
   cursor: pointer;
 
-  /* 🔥 여기 두 줄이 핵심 */
   color: ${({ theme }) => theme.colors.text};   /* 투표하기 텍스트 색 고정 */
   -webkit-appearance: none;
   appearance: none;

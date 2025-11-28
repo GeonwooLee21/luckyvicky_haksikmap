@@ -6,7 +6,7 @@
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import { isOpenNow } from "./OpeningHours";
-import StatusBadge from "./StatusBadge"; // 추가
+import StatusBadge from "./StatusBadge";
 
 export default function MainPage() {
   const navigate = useNavigate();
@@ -71,12 +71,12 @@ const Card = styled.button`
 
   font-size: 16px;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.text};    /* 🔹 버튼 안 텍스트 색 고정 */
+  color: ${({ theme }) => theme.colors.text};    /* 버튼 안 텍스트 색 고정 */
 
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 
-  /* 🔹 iOS 기본 버튼 스타일 제거 (system-blue 방지) */
+  /* iOS 기본 버튼 스타일 제거 (system-blue 방지) */
   -webkit-appearance: none;
   appearance: none;
   outline: none;
@@ -111,7 +111,7 @@ const Overlay = styled.div`
 `;
 
 const Name = styled.span`
-  color: ${({ theme }) => theme.colors.text};   /* 🔹 식당 이름 색 한 번 더 명시 */
+  color: ${({ theme }) => theme.colors.text};   /* 식당 이름 색 한 번 더 명시 */
 `;
 
 const Emoji = styled.span`

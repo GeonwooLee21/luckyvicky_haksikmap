@@ -8,7 +8,6 @@ import styled from "styled-components";
 import { getAllRestaurantStatus } from "../Api";
 
 // 혼잡도 숫자 → 혼잡도 구간
-// 기준은 일단 예시. 팀에서 정한 기준으로 추후 수정 예정.
 function congestionToLevel(value) {
   if (value === undefined || value === null) return null;
   if (value < 0) return "none";      // 집계 안 됨 (-1 같은 경우)

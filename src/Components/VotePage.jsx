@@ -36,10 +36,10 @@ function VotePage() {
   const [selectedWait, setSelectedWait] = useState(null);   // "5분" 같은 문자열
   const [showModal, setShowModal] = useState(false);
 
-  // 🔹 오늘 한 번이라도 투표한 적이 있는지 여부
+  // 오늘 한 번이라도 투표한 적이 있는지 여부
   const [hasVotedToday, setHasVotedToday] = useState(false);
 
-  // ----- 1) 처음 진입 시 잔여 투표횟수 가져오기 -----
+  // 1) 처음 진입 시 잔여 투표횟수 가져오기
   useEffect(() => {
     async function loadRemain() {
       try {
@@ -63,7 +63,7 @@ function VotePage() {
     loadRemain();
   }, []);
 
-  // 🔹 페이지 진입 시, localStorage 를 보고 "오늘 이미 투표했는지" 확인
+  // 페이지 진입 시, localStorage 를 보고 "오늘 이미 투표했는지" 확인
   useEffect(() => {
     const today = new Date();
     const y = today.getFullYear();
@@ -81,7 +81,7 @@ function VotePage() {
   // remaining이 null이면 아직 정보 없음 → false 처리
   const noChanceLeft = remaining !== null && remaining <= 0;
 
-  // ---------- 2) 혼잡도 / 대기시간 선택 ----------
+  // 2) 혼잡도 / 대기시간 선택
   const handleLevelClick = (level) => {
     if (noChanceLeft) return;
     setSelectedLevel(level);
@@ -93,7 +93,7 @@ function VotePage() {
     setSelectedWait(wait);
   };
 
-  // ------------- 3) 투표하기 클릭 --------------
+  // 3) 투표하기 클릭
   const handleSubmit = async () => {
     if (!selectedLevel || !selectedWait) return;
 
@@ -125,7 +125,7 @@ function VotePage() {
         setRemaining(data.remainingVoteCount);
       }
 
-      // 🔹 오늘 아무 식당이든 한 번 투표했음을 기록 (YYYY-MM-DD 형식)
+      // 오늘 아무 식당이든 한 번 투표했음을 기록 (YYYY-MM-DD 형식)
       const today = new Date();
       const y = today.getFullYear();
       const m = String(today.getMonth() + 1).padStart(2, "0");
@@ -133,7 +133,7 @@ function VotePage() {
       const todayStr = `${y}-${m}-${d}`;
       localStorage.setItem("voted_date", todayStr);
 
-      // 🔹 현재 페이지에서도 즉시 "오늘 투표함" 상태로 전환
+      // 현재 페이지에서도 즉시 "오늘 투표함" 상태로 전환
       setHasVotedToday(true);
 
       setShowModal(true); // 투표 완료 모달 열기
@@ -143,7 +143,7 @@ function VotePage() {
     }
   };
 
-  // ---------- 4) 모달에서 확인 눌렀을 때 ----------
+  // 4) 모달에서 확인 눌렀을 때
   const handleModalClose = () => {
     setShowModal(false);
     navigate(`/cafeteria/${name}`, {
@@ -213,7 +213,7 @@ function VotePage() {
         </SubmitButton>
       )}
 
-      {/* 🔹 오늘 한 번이라도 투표한 적이 있으면 '뒤로 가기' 버튼 노출 */}
+      {/* 오늘 한 번이라도 투표한 적이 있으면 '뒤로 가기' 버튼 노출 */}
       {hasVotedToday && (
         <BackButton type="button" onClick={() => navigate(`/cafeteria/${name}`)}>
           뒤로 가기
@@ -279,7 +279,7 @@ const LevelButton = styled.button`
   background: transparent;
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
   opacity: ${({ disabled }) => (disabled ? 0.5 : 1)};
-  /* 🔹 iOS 기본 버튼 스타일 제거 */
+  /* iOS 기본 버튼 스타일 제거 */
   -webkit-appearance: none;
   appearance: none;
 `;
@@ -301,7 +301,7 @@ const LevelCard = styled.div`
 const LevelLabel = styled.div`
   font-size: 14px;
   margin-bottom: 8px;
-  color: ${({ theme }) => theme.colors.text};   /* 🔹 명시적으로 텍스트 색 지정 */
+  color: ${({ theme }) => theme.colors.text};   /* 명시적으로 텍스트 색 지정 */
 `;
 
 const CheckSquare = styled.div`
@@ -366,7 +366,7 @@ const SubmitButton = styled.button`
   }
 `;
 
-// 🔹 새로 추가된 '뒤로 가기' 버튼 스타일
+// 새로 추가된 '뒤로 가기' 버튼 스타일
 const BackButton = styled.button`
   padding: 12px;
   border-radius: 10px;

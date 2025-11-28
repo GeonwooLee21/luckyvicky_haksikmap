@@ -8,10 +8,9 @@ import MainPage from "./Components/MainPage";
 import CafeteriaMain from "./Components/CafeteriaPage";
 import VotePage from "./Components/VotePage";
 import styled from "styled-components";
-
 import GlobalStyle from "./Styles/GlobalStyles";
 import { theme } from "./Styles/Theme";
-//import AppLayout from "./Components/Layout/AppLayout";
+import AppLayout from "./Components/AppLayout";
 
 function App() {
   return (

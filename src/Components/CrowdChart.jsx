@@ -160,7 +160,7 @@ export default function CrowdChart({ data }) {
               barColor = "#ff2fa3";
             }
 
-            // 🔹 제일 붐빌 때는 같은 계열이지만 조금 더 강조
+            // 제일 붐빌 때는 같은 계열이지만 조금 더 강조
             if (isPeak && safeRaw > 0) {
               barShadow = "0 4px 12px rgba(255, 47, 163, 0.45)";
             }
