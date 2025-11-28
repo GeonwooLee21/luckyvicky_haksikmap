@@ -6,14 +6,13 @@ import styled from "styled-components";
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CrowdChart from "./CrowdChart";
-import { isOpenNow } from "./OpeningHours";
+import { isOpenNow, getNextOpeningInfo } from "./OpeningHours";
 import LuckyVickyModal from "./LuckyVickyModal";
-import { getRestaurantStatus } from "../Api";
+import { getRestaurantStatus, getRemainingVotes } from "../Api";
 import { GONGSTAURANT_DUMMY } from "../Dummy/Gongstaurant_Dummy";
 import { GAMGGOTERIA_DUMMY } from "../Dummy/Gamggoteria_Dummy";
 import { CHEOMSEONG_DUMMY } from "../Dummy/Cheomseong_Dummy";
-import { getRemainingVotes } from "../Api";
-import WaitTimeText from "./WaitTimeText";   // ✅ 예측 대기시간 멘트 컴포넌트 추가
+import WaitTimeText from "./WaitTimeText";
 
 // FE 라우트 name → 백엔드 restaurantId 매핑
 const RESTAURANT_IDS = {
@@ -23,11 +22,8 @@ const RESTAURANT_IDS = {
 };
 
 // 혼잡도 숫자 → 혼잡도 라벨
-// (백엔드에서 주는 값 범위에 맞게 기준은 팀에서 조정 가능)
 function congestionValueToLabel(value) {
   if (value == null) return null;
-
-  // -1 등 집계 전 값이 오면 null 처리
   if (value < 0) return null;
   if (value >= 70) return "혼잡";
   if (value >= 40) return "보통";
@@ -51,7 +47,6 @@ function labelToLevel(label) {
 // 혼잡도 라벨 → 자연스러운 문장
 function labelToSentence(label) {
   if (!label) return null;
-
   switch (label) {
     case "혼잡":
       return "혼잡해요";
@@ -60,7 +55,7 @@ function labelToSentence(label) {
     case "여유":
       return "여유로워요";
     default:
-      return `${label}이에요`; // fallback
+      return `${label}이에요`;
   }
 }
 
@@ -71,21 +66,10 @@ function CafeteriaPage() {
 
   const [isNoVoteModalOpen, setIsNoVoteModalOpen] = useState(false);
 
-  const voted = location.state?.fromVote === true;
-
   const info = {
-    Gongstaurant: {
-      title: "공식당",
-      message: "20분 정도 기다리셔야 해요 ㅠㅠ",
-    },
-    Cheomseong: {
-      title: "복지관",
-      message: "지금은 평균 정도로 붐벼요!",
-    },
-    Gamggoteria: {
-      title: "감꽃식당",
-      message: "럭키비키! 바로 먹을 수 있어요 🎉",
-    },
+    Gongstaurant: { title: "공식당" },
+    Cheomseong: { title: "복지관" },
+    Gamggoteria: { title: "감꽃식당" },
   };
 
   const current = info[name] || info.Gongstaurant;
@@ -100,6 +84,8 @@ function CafeteriaPage() {
 
   // 현재 시간 기준 오픈 여부
   const open = isOpenNow(name);
+  // 비운영 시간일 때만 사용: 다음 운영 정보
+  const nextOpeningInfo = !open ? getNextOpeningInfo(name) : null;
 
   // 오늘 아무 식당에서나 투표한 적 있는지
   const [hasTodayVote, setHasTodayVote] = useState(false);
@@ -123,7 +109,6 @@ function CafeteriaPage() {
 
     const stored = localStorage.getItem("voted_date");
 
-    // 혹시 이번에 투표하고 넘어온 경우(location.state로 온 경우)
     if (location.state?.fromVote === true) {
       localStorage.setItem("voted_date", todayStr);
       setHasTodayVote(true);
@@ -141,36 +126,29 @@ function CafeteriaPage() {
 
   // 마운트될 때 / name(restaurantId) 바뀔 때마다 혼잡도 불러오기
   useEffect(() => {
-    let cancelled = false; // 언마운트 후 setState 방지용
+    let cancelled = false;
 
     async function fetchStatus() {
       try {
         const res = await getRestaurantStatus(restaurantId);
-
         const rawValue = res?.congestionValue;
         const label = congestionValueToLabel(rawValue);
         if (cancelled) return;
 
         setCongestionLabel(label);
 
-        // 오픈 중이고, 혼잡/보통/여유 라벨이 있으면 항상 럭키비키 모달
         if (open && label) {
           setShowLuckyModal(true);
         }
       } catch (err) {
         console.error("식당 혼잡도 불러오기 실패:", err);
-        if (!cancelled) {
-          setCongestionLabel(null);
-        }
+        if (!cancelled) setCongestionLabel(null);
       } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
+        if (!cancelled) setIsLoading(false);
       }
     }
 
     fetchStatus();
-
     return () => {
       cancelled = true;
     };
@@ -180,17 +158,15 @@ function CafeteriaPage() {
   const handleClickVote = async () => {
     try {
       const res = await getRemainingVotes(name);
-
-      // 콘솔에 응답 모양, remaining 값을 찍어보는 부분
       console.log("잔여 투표 응답:", res);
 
       const remaining = res.remainingVoteCount;
       console.log("파싱한 remaining 값:", remaining);
 
       if (remaining <= 0) {
-        setIsNoVoteModalOpen(true); // 여기로 들어오면 오늘 투표 다 쓴 상태
+        setIsNoVoteModalOpen(true);
       } else {
-        navigate(`/vote/${name}`); // 여기로 들어오면 오늘 투표 다 쓴 상태
+        navigate(`/vote/${name}`);
       }
     } catch (err) {
       console.error("잔여 투표 수 확인 실패:", err);
@@ -203,15 +179,41 @@ function CafeteriaPage() {
       {/* 식당 이름 */}
       <Card>{current.title}</Card>
 
-      {/* 안내 멘트: 오픈 여부 + 혼잡도 로딩 상태에 따라 변경 */}
+      {/* 상태 + (비운영 시) 운영시간 안내까지 한 카드에 병합 */}
       <MainTextCard>
-        {!open
-          ? `${current.title}은 지금 오픈 준비 중이에요.`
-          : isLoading
-          ? `${current.title}은 혼잡도 집계 중이에요`
-          : congestionLabel
-          ? `${current.title}은 ${labelToSentence(congestionLabel)}`
-          : `${current.title}은 혼잡도 집계 중이에요`}
+        {open ? (
+          // 🔓 운영 중
+          isLoading ? (
+            `${current.title}은 혼잡도 집계 중이에요`
+          ) : congestionLabel ? (
+            `${current.title}은 ${labelToSentence(congestionLabel)}`
+          ) : (
+            `${current.title}은 혼잡도 집계 중이에요`
+          )
+        ) : nextOpeningInfo ? (
+          // 🔒 비운영 + 다음 운영 정보 있음
+          <>
+            {nextOpeningInfo.type === "today"
+              ? `${current.title}은 지금 오픈 준비 중이에요.`
+              : "오늘 운영은 모두 종료됐어요."}
+            <SubText>
+              {nextOpeningInfo.type === "today" && (
+                <>
+                  {`다음 ${nextOpeningInfo.label ?? "운영"}까지 ${
+                    nextOpeningInfo.diffText
+                  } 남았어요.`}
+                  <br />
+                </>
+              )}
+              {`다음 ${nextOpeningInfo.label ?? "운영"} 시간: ${
+                nextOpeningInfo.open
+              } ~ ${nextOpeningInfo.close}`}
+            </SubText>
+          </>
+        ) : (
+          // 🔒 비운영 + 시간 정보 없음 (fallback)
+          `${current.title}은 지금 오픈 준비 중이에요.`
+        )}
       </MainTextCard>
 
       {/* 오픈 중일 때만 그래프 카드 보이기 */}
@@ -219,9 +221,8 @@ function CafeteriaPage() {
         <ChartCard>
           {hasTodayVote ? (
             <>
-              {/* ✅ 투표를 한 날에만 예측 대기시간 멘트 + 그래프 보여주기 */}
-              <WaitTimeText restaurantId={restaurantId} />  {/* ✅ 멘트가 위 */}
-              <CrowdChart data={chartData} />                {/* ✅ 그래프는 아래 */}
+              <WaitTimeText restaurantId={restaurantId} />
+              <CrowdChart data={chartData} />
             </>
           ) : (
             <>
@@ -234,7 +235,6 @@ function CafeteriaPage() {
           )}
         </ChartCard>
       ) : (
-        // 오픈 전에는 그래프 대신 불투명 안내 박스
         <ClosedOverlayCard>
           운영 시간이 되면
           <br />
@@ -243,10 +243,8 @@ function CafeteriaPage() {
       )}
 
       <ButtonRow>
-        {/* 항상 보이는 버튼 */}
         <StyledLink to="/">첫 화면으로 돌아가기</StyledLink>
 
-        {/* 오픈 시간에만 보이는 버튼 */}
         {open && (
           <StyledButton type="button" onClick={handleClickVote}>
             투표하기
@@ -254,14 +252,12 @@ function CafeteriaPage() {
         )}
       </ButtonRow>
 
-      {/* 모든 혼잡도 상태에서 띄우는 럭키비키 모달 */}
       <LuckyVickyModal
         open={showLuckyModal}
         onClose={() => setShowLuckyModal(false)}
         level={labelToLevel(congestionLabel)}
       />
 
-      {/* 오늘 투표 횟수 모두 사용했을 때 뜨는 모달 */}
       <LuckyVickyModal
         open={isNoVoteModalOpen}
         onClose={() => setIsNoVoteModalOpen(false)}
@@ -272,7 +268,6 @@ function CafeteriaPage() {
 }
 
 export default CafeteriaPage;
-
 
 /* ---------------- styled-components ---------------- */
 
@@ -302,21 +297,29 @@ const MainTextCard = styled(Card)`
   font-weight: 500;
 `;
 
+// ✅ MainTextCard 안에서 쓰는 서브 문구 (운영시간 안내)
+const SubText = styled.span`
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: ${({ theme }) => theme.colors.muted};
+  line-height: 1.6;
+`;
+
 const ChartCard = styled(Card)`
   height: 280px;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.muted};
 
   display: flex;
-  flex-direction: column;   /* ✅ 세로 배치 */
-  align-items: center;      /* 가운데 정렬 */
-  justify-content: center;  /* 세로 방향도 가운데 정렬 */
-  gap: 16px;                /* ✅ 멘트와 그래프 사이 간격 */
-
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   line-height: 1.6;
 `;
 
-// 닫힘 안내용 불투명 박스
 const ClosedOverlayCard = styled(ChartCard)`
   color: ${({ theme }) => theme.colors.text};
   font-weight: 600;

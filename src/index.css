@@ -1,18 +1,26 @@
 /* FE1 */
 @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
 
-body {
+/* 추가: 전체 뼈대 세팅 */
+html,
+body,
+#root {
   margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
 
+/* 기존 body 스타일 + 약간 보완 */
+body {
   /* Jua 폰트 우선 적용 */
   font-family: 'Jua', sans-serif;
 
-  /* font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif; */
-  
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* iOS/WebKit 스크롤 부드럽게 (모바일용) */
+  -webkit-overflow-scrolling: touch;
 }
 
 code {
