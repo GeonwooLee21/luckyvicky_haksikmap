@@ -65,6 +65,8 @@ function CafeteriaPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const fromVote = location.state?.fromVote === true;
+
   const [isNoVoteModalOpen, setIsNoVoteModalOpen] = useState(false);
 
   const info = {
@@ -138,7 +140,7 @@ function CafeteriaPage() {
 
         setCongestionLabel(label);
 
-        if (open && label) {
+        if (open && label && !fromVote) {
           setShowLuckyModal(true);
         }
       } catch (err) {
